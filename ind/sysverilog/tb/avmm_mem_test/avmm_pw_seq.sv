@@ -17,7 +17,7 @@
 class avmm_pw_seq extends uvm_sequence #(avmm_tr);
 
   `uvm_object_utils(avmm_pw_seq)
-  
+
   // Control whether sequence sets or unsets the password for Page 2 access
   bit m_set_password = 1;
 
@@ -39,7 +39,8 @@ task avmm_pw_seq::body();
     // TODO: Create sequence items, which are constrained to write password to
     //       the right registers. Hint: Look at the else branch for inspiration!
     // --------------------------------------------------------------------------
-
+    `uvm_do_with(req, {write == 1; address == 127; writedata == 23;})
+    `uvm_do_with(req, {write == 1; address == 126; writedata == 79;})
     // --------------------------------------------------------------------------
     // END TODO
     // --------------------------------------------------------------------------
@@ -54,4 +55,3 @@ endtask : body
 
 
 `endif // AVMM_PW_SEQ_SV
-

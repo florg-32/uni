@@ -18,10 +18,10 @@ class avmm_mem_coverage extends uvm_subscriber #(avmm_tr);
 
   `uvm_component_utils(avmm_mem_coverage)
 
-  avmm_config m_config;    
+  avmm_config m_config;
   bit         m_is_covered;
   avmm_tr     m_item, m_prev_item;
-  
+
   logic [7:0] m_pw_regs[127:126] = '{default: 0};
 
   typedef enum {READ_E, WRITE_E, WRITE_PAGE_2_LOCKED_E, WRITE_PAGE_2_UNLOCKED_E} access_type_t;
@@ -38,7 +38,7 @@ class avmm_mem_coverage extends uvm_subscriber #(avmm_tr);
       else
         return WRITE_E;
     else
-      `uvm_error("avmm_mem_coverage", "Illegal AVMM transaction!")        
+      `uvm_error("avmm_mem_coverage", "Illegal AVMM transaction!")
   endfunction: get_access_type
 
 
@@ -56,28 +56,43 @@ class avmm_mem_coverage extends uvm_subscriber #(avmm_tr);
     cp_read: coverpoint m_item.read {
       bins read  = {1};
     }
-    
+
     cp_write: coverpoint m_item.write {
       bins write  = {1};
     }
 
-    cp_writedata: coverpoint m_item.writedata[7:0] iff m_item.write == 1 {
+    cp_writedata: coverpoint m_item.writedata[7:0] iff (m_item.write == 1) {
       bins zero_data = {0};
       bins max_data  = {8'hFF};
       bins special_data_patterns[] = {8'hAA, 8'h55};
     }
 
-    cp_readdata: coverpoint m_item.readdata iff m_item.read == 1 {
+    cp_readdata: coverpoint m_item.readdata iff (m_item.read == 1) {
       bins zero_data = {0};
       bins max_data  = {8'hFF};
-      bins special_data_patterns[] = {8'hAA, 8'h55};    
+      bins special_data_patterns[] = {8'hAA, 8'h55};
     }
 
     // ------------------------------------------------------------------------
-    // TODO: Write additional coverage 
+    // TODO: Write additional coverage
     // ------------------------------------------------------------------------
+    cr_readaddress: cross cp_address, cp_readdata;
+    cr_writeaddress: cross cp_address, cp_writedata;
 
-    // ------------------------------------------------------------------------
+    cp_seq: coverpoint {m_item.read, m_item.write} {
+      bins read_after_read = (2'b10 => 2'b10);
+      bins read_after_write = (2'b01 => 2'b10);
+      bins write_after_read = (2'b10 => 2'b01);
+      bins write_after_write = (2'b01 => 2'b01);
+    }
+
+    cr_locked: cross cp_address, cp_seq iff (get_access_type(1) == WRITE_PAGE_2_LOCKED_E && m_item.address == m_prev_item.address) {
+      bins read_after_write = binsof(cp_seq.read_after_write);
+    }
+    cr_unlocked: cross cp_address, cp_seq iff (get_access_type(1) == WRITE_PAGE_2_UNLOCKED_E && m_item.address == m_prev_item.address) {
+      bins read_after_write = binsof(cp_seq.read_after_write);
+    }
+   // ------------------------------------------------------------------------
     // END TODO
     // ------------------------------------------------------------------------
 
@@ -88,7 +103,7 @@ class avmm_mem_coverage extends uvm_subscriber #(avmm_tr);
   extern function void build_phase(uvm_phase phase);
   extern function void report_phase(uvm_phase phase);
 
-endclass : avmm_mem_coverage 
+endclass : avmm_mem_coverage
 
 
 function avmm_mem_coverage::new(string name, uvm_component parent);
@@ -110,7 +125,7 @@ function void avmm_mem_coverage::write(input avmm_tr t);
     m_pw_regs[t.address] = t.writedata;
 
   if (m_config.coverage_enable)
-  begin    
+  begin
     m_cov.sample();
     if (m_cov.get_inst_coverage() >= 100) m_is_covered = 1;
   end
@@ -131,4 +146,3 @@ function void avmm_mem_coverage::report_phase(uvm_phase phase);
 endfunction : report_phase
 
 `endif // AVMM_MEM_COVERAGE_SV
-

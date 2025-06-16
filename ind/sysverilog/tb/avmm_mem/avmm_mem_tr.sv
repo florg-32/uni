@@ -13,20 +13,20 @@
 `ifndef AVMM_MEM_TR_SV
 `define AVMM_MEM_TR_SV
 
-class avmm_mem_tr extends avmm_tr; 
+class avmm_mem_tr extends avmm_tr;
 
   `uvm_object_utils(avmm_mem_tr)
 
   // --------------------------------------------------------------------------
   // TODO: Add constraints to meet coverage
   // --------------------------------------------------------------------------
-
+  constraint c_operation { (read | write) == 1; };
+  constraint c_wrdata { writedata <= 255; }
   // --------------------------------------------------------------------------
   // END TODO
   // --------------------------------------------------------------------------
 
-endclass : avmm_mem_tr 
+endclass : avmm_mem_tr
 
 
 `endif // AVMM_MEM_TR_SV
-

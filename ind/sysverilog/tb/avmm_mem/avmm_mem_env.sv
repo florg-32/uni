@@ -21,9 +21,9 @@ class avmm_mem_env extends uvm_env;
   extern function new(string name, uvm_component parent);
 
   // Child agents
-  avmm_config    m_avmm_config;  
-  avmm_agent     m_avmm_agent;   
-  
+  avmm_config    m_avmm_config;
+  avmm_agent     m_avmm_agent;
+
   // Scoreboard
   avmm_mem_scoreboard m_scoreboard;
   // Coverage
@@ -35,7 +35,7 @@ class avmm_mem_env extends uvm_env;
   extern function void connect_phase(uvm_phase phase);
   extern function void end_of_elaboration_phase(uvm_phase phase);
 
-endclass : avmm_mem_env 
+endclass : avmm_mem_env
 
 function avmm_mem_env::new(string name, uvm_component parent);
   super.new(name, parent);
@@ -45,14 +45,14 @@ function void avmm_mem_env::build_phase(uvm_phase phase);
   `uvm_info(get_type_name(), "In build_phase", UVM_HIGH)
 
   // Fetch the top-level config from DB
-  if (!uvm_config_db #(avmm_mem_config)::get(this, "", "config", m_config)) 
+  if (!uvm_config_db #(avmm_mem_config)::get(this, "", "config", m_config))
     `uvm_error(get_type_name(), "Unable to get avmm_mem_config")
 
   // Create configuration object for agent / scoreboard / coverage
-  m_avmm_config                 = new("m_avmm_config");         
-  m_avmm_config.vif             = m_config.avmm_vif;            
-  m_avmm_config.is_active       = m_config.is_active_avmm;      
-  m_avmm_config.checks_enable   = m_config.checks_enable_avmm;  
+  m_avmm_config                 = new("m_avmm_config");
+  m_avmm_config.vif             = m_config.avmm_vif;
+  m_avmm_config.is_active       = m_config.is_active_avmm;
+  m_avmm_config.checks_enable   = m_config.checks_enable_avmm;
   m_avmm_config.coverage_enable = m_config.coverage_enable_avmm;
 
   // Put config object into the config DB
@@ -74,14 +74,15 @@ function void avmm_mem_env::connect_phase(uvm_phase phase);
   // TODO: Connect analysis port of agent to analysis imp ports of coverage
   //       class and scoreboard
   // --------------------------------------------------------------------------
-
+  m_avmm_agent.analysis_port.connect(m_coverage.analysis_export);
+  m_avmm_agent.analysis_port.connect(m_scoreboard.item_collected_export);
   // --------------------------------------------------------------------------
   // END TODO
   // --------------------------------------------------------------------------
 
 endfunction : connect_phase
 
-function void avmm_mem_env::end_of_elaboration_phase(uvm_phase phase);  
+function void avmm_mem_env::end_of_elaboration_phase(uvm_phase phase);
    uvm_factory factory = uvm_factory::get();
 
   `uvm_info(get_type_name(), "Information printed from avmm_mem_env::end_of_elaboration_phase method", UVM_MEDIUM)
@@ -89,11 +90,10 @@ function void avmm_mem_env::end_of_elaboration_phase(uvm_phase phase);
 
   // Print testbench hierarchy
   uvm_top.print_topology();
-  
+
   // Print all components registered in the UVM factory
   factory.print();
 endfunction : end_of_elaboration_phase
 
 
 `endif // AVMM_MEM_ENV_SV
-

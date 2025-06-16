@@ -26,7 +26,7 @@ class avmm_driver extends uvm_driver #(avmm_tr);
   extern task run_phase(uvm_phase phase);
   extern task do_drive();
 
-endclass : avmm_driver 
+endclass : avmm_driver
 
 
 function avmm_driver::new(string name, uvm_component parent);
@@ -40,7 +40,10 @@ task avmm_driver::run_phase(uvm_phase phase);
   // --------------------------------------------------------------------------
   // TODO: Insert code to drive 0 on all AVMM input signals during reset
   // --------------------------------------------------------------------------
-
+  vif.address <= '0;
+  vif.read <= '0;
+  vif.write <= '0;
+  vif.writedata <= '0;
   // --------------------------------------------------------------------------
   // END TODO
   // --------------------------------------------------------------------------
@@ -48,7 +51,7 @@ task avmm_driver::run_phase(uvm_phase phase);
   // --------------------------------------------------------------------------
   // TODO: Insert code to wait until design is out of reset
   // --------------------------------------------------------------------------
-
+  @(posedge vif.rst_n)
   // --------------------------------------------------------------------------
   // END TODO
   // --------------------------------------------------------------------------
@@ -59,7 +62,7 @@ task avmm_driver::run_phase(uvm_phase phase);
     // Get next transaction from sequencer
     seq_item_port.get_next_item(req);
     `uvm_info(get_type_name(), {"req item\n",req.sprint}, UVM_HIGH)
-    do_drive();    
+    do_drive();
   end
 endtask : run_phase
 
@@ -83,8 +86,7 @@ task avmm_driver::do_drive();
     rsp.readdata = vif.readdata;
   end
   // Inform sequencer that transaction is done and send back response
-  seq_item_port.item_done(rsp); 
+  seq_item_port.item_done(rsp);
 endtask
 
 `endif // AVMM_DRIVER_SV
-

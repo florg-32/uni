@@ -66,7 +66,7 @@ task avmm_mem_test::run_phase(uvm_phase phase);
     // --------------------------------------------------------------------------
     // TODO: Increase transaction count if needed
     // --------------------------------------------------------------------------
-    random_seq.m_transaction_count = 10;
+    random_seq.m_transaction_count = 500;
     // --------------------------------------------------------------------------
     // END TODO
     // --------------------------------------------------------------------------
@@ -79,12 +79,14 @@ task avmm_mem_test::run_phase(uvm_phase phase);
     // TODO: Generate password sequence to either unlock or lock Page 2
     //       write access. You could use, e.g. the function $urandom_range to
     //       randomly decide if the password should be set or reset.
-    // --------------------------------------------------------------------------    
-
+    // --------------------------------------------------------------------------
+    pw_seq = avmm_pw_seq::type_id::create("lock_random_seq");
+    pw_seq.m_set_password = $urandom_range(0, 1);
+    pw_seq.start(m_env.m_avmm_agent.m_sequencer);
     // --------------------------------------------------------------------------
     // END TODO
     // --------------------------------------------------------------------------
-    
+
   end
 
   // Sequence done => run phase of test may terminate
@@ -92,4 +94,3 @@ task avmm_mem_test::run_phase(uvm_phase phase);
 endtask : run_phase
 
 `endif // AVMM_MEM_TEST_SV
-
