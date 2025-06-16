@@ -1,0 +1,10 @@
+[libraries]
+common.files = [
+    "common/*.vhd"
+]
+
+ex.files = [
+    "ex1/*.vhd",
+    "ex2/*.vhd",
+    "ex4/*.vhd",
+]
