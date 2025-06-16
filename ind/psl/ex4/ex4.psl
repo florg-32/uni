@@ -1,4 +1,13 @@
 vunit psl_vunit_vu (ex4(beh)) {
-  -- Enter your code here
+  default clock is rising_edge(clk);
 
+  assert always rising_edge(rd_ena) -> next rd_valid;
+
+  assert always {rd_ena} |=> {(rd_valid and not rd_done)[=1:7]; rd_done; not rd_done};
+
+  assert always rd_ena -> rd_ena until rd_done;
+
+  signal burst: integer;
+  burst <= rd_burst when rising_edge(rd_ena) else burst - 1 when rising_edge(clk) and rd_ena = '1' and rd_valid = '1' else burst;
+  assert always rd_done -> burst = 0;
 }

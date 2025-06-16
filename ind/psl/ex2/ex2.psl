@@ -1,3 +1,10 @@
 vunit psl_vunit_vu (ex2(beh)) {
-  -- Enter your code here
+  assert (never {pi; pi}) @clk1;
+  assert (never {po; po}) @clk2;
+
+  assert always {pi} @clk1 |=> {not pi[*]; po} @clk2;
+
+  assert always (pi -> eventually! po) @clk1;
+
+  assert always {pi} @clk1 |=> {not po[*2:inf]} @clk2;
 }
